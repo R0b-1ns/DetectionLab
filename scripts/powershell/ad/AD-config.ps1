@@ -360,9 +360,10 @@ $BootstrapScriptSysvolPath = Join-Path $SysvolScripts $BootstrapScriptName
 Ensure-Directory -Path $SysvolScripts
 Copy-Item -Path $GPOWorkstationBootstrapScript -Destination $BootstrapScriptSysvolPath -Force
 
-Set-GPStartupScript `
+$runOnceCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$BootstrapScriptSysvolPath`""
+Set-GPRegistryValue `
   -Name $GPOWorkstationName `
-  -ScriptName $BootstrapScriptName `
-  -ScriptParameters "" `
-  -ScriptType PowerShell `
-  -ScriptPath $BootstrapScriptSysvolPath
+  -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce" `
+  -ValueName "DL-Bootstrap" `
+  -Type String `
+  -Value $runOnceCommand
