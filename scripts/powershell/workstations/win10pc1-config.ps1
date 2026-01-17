@@ -38,7 +38,9 @@ function Get-LabConfig {
     "Win10-PC1.Networking.PrefixLength",
     "Win10-PC1.Networking.Gateway",
     "Win10-PC1.Networking.DnsServer",
-    "Win10-PC1.Networking.Hostname"
+    "Win10-PC1.Networking.Hostname",
+    "AD.Domain.DnsName",
+    "AD.Domain.NetBiosName"
   )
 
   foreach ($item in $requiredPaths) {
@@ -87,6 +89,8 @@ $PrefixLength = $NodeConfig.PrefixLength
 $Gateway = $NodeConfig.Gateway
 $DnsServer = $NodeConfig.DnsServer
 $Hostname = $NodeConfig.Hostname
+$DomainDnsName = $Config.AD.Domain.DnsName
+$DomainNetBios = $Config.AD.Domain.NetBiosName
 
 Write-Section "System configuration"
 
@@ -107,27 +111,18 @@ if ($dhcpIps) {
   $dhcpIps | Remove-NetIPAddress -Confirm:$false
 }
 
-$existingIp = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 -ErrorAction Stop |
-  Where-Object { $_.IPAddress -eq $IPAddress }
 $otherStaticIps = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 -ErrorAction Stop |
   Where-Object { $_.IPAddress -ne $IPAddress -and $_.PrefixOrigin -ne "Dhcp" }
 if ($otherStaticIps) {
   Write-Host "[!] Other static IPv4 addresses exist on $InterfaceAlias; leaving them unchanged." -ForegroundColor Yellow
 }
 
-if (-not $existingIp) {
-  Write-Host "Setting static IP" -ForegroundColor DarkGray
-  New-NetIPAddress `
-    -InterfaceAlias $InterfaceAlias `
-    -IPAddress $IPAddress `
-    -PrefixLength $PrefixLength `
-    -DefaultGateway $Gateway
-} else {
-  $defaultRoute = Get-NetRoute -InterfaceAlias $InterfaceAlias -DestinationPrefix "0.0.0.0/0" -ErrorAction SilentlyContinue
-  if (-not $defaultRoute) {
-    New-NetRoute -InterfaceAlias $InterfaceAlias -DestinationPrefix "0.0.0.0/0" -NextHop $Gateway | Out-Null
-  }
-}
+Write-Host "Setting static IP" -ForegroundColor DarkGray
+New-NetIPAddress `
+  -InterfaceAlias $InterfaceAlias `
+  -IPAddress $IPAddress `
+  -PrefixLength $PrefixLength `
+  -DefaultGateway $Gateway
 
 Write-Host "Setting DNS" -ForegroundColor DarkGray
 $currentDns = (Get-DnsClientServerAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4).ServerAddresses
@@ -135,6 +130,17 @@ if (-not ($currentDns -contains $DnsServer)) {
   Set-DnsClientServerAddress `
     -InterfaceAlias $InterfaceAlias `
     -ServerAddresses $DnsServer
+}
+
+Write-Host "Checking domain join status" -ForegroundColor DarkGray
+$computerSystem = Get-CimInstance Win32_ComputerSystem
+if (-not $computerSystem.PartOfDomain) {
+  Write-Host "Joining domain $DomainDnsName" -ForegroundColor DarkGray
+  $credential = Get-Credential -Message "Enter credentials for $DomainNetBios domain join"
+  Add-Computer -DomainName $DomainDnsName -Credential $credential -ErrorAction Stop
+  Write-Host "[!] Domain join complete; rebooting." -ForegroundColor Yellow
+  Restart-Computer -Force
+  exit 0
 }
 
 Write-Host "[+] WIN10-PC1 configuration complete."
