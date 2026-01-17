@@ -219,6 +219,11 @@ if (-not $domainPresent) {
   exit 0
 }
 
+$gpmcFeature = Get-WindowsFeature -Name GPMC
+if (-not $gpmcFeature.Installed) {
+  Install-WindowsFeature GPMC | Out-Null
+}
+
 Import-Module GroupPolicy -ErrorAction Stop
 
 Write-Section "Organizational Units configuration"
