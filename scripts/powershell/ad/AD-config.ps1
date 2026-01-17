@@ -79,22 +79,22 @@ function Get-LabConfig {
   }
 
   $requiredPaths = @(
-    "Domain.DnsName",
-    "Domain.NetBiosName",
-    "Domain.SafeModeAdminPasswordPrompt",
-    "DC.InterfaceAlias",
-    "DC.IpAddress",
-    "DC.PrefixLength",
-    "DC.Gateway",
-    "DC.hostname",
-    "Path.SysvolScripts",
-    "OU.Workstations",
-    "OU.Users",
-    "GPO.Users.Name",
-    "GPO.Users.GpoBackup",
-    "GPO.Workstations.Name",
-    "GPO.Workstations.GpoBackup",
-    "GPO.Workstations.BootstrapScript"
+    "AD.Domain.DnsName",
+    "AD.Domain.NetBiosName",
+    "AD.Domain.SafeModeAdminPasswordPrompt",
+    "AD.DC.InterfaceAlias",
+    "AD.DC.IpAddress",
+    "AD.DC.PrefixLength",
+    "AD.DC.Gateway",
+    "AD.DC.hostname",
+    "AD.Path.SysvolScripts",
+    "AD.OU.Workstations",
+    "AD.OU.Users",
+    "AD.GPO.Users.Name",
+    "AD.GPO.Users.GpoBackup",
+    "AD.GPO.Workstations.Name",
+    "AD.GPO.Workstations.GpoBackup",
+    "AD.GPO.Workstations.BootstrapScript"
   )
 
   foreach ($item in $requiredPaths) {
@@ -118,33 +118,34 @@ Write-Section "Reading config.json"
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $configPath = Join-Path (Resolve-Path (Join-Path $scriptRoot "..\..\..\config")) "config.json"
 $Config = Get-LabConfig -Path $configPath
+$AdConfig = $Config.AD
 
-$DomainName = $Config.Domain.DnsName
-$Netbios = $Config.Domain.NetBiosName
+$DomainName = $AdConfig.Domain.DnsName
+$Netbios = $AdConfig.Domain.NetBiosName
 
-$promptDsrm = [bool]$Config.Domain.SafeModeAdminPasswordPrompt
+$promptDsrm = [bool]$AdConfig.Domain.SafeModeAdminPasswordPrompt
 if (-not $promptDsrm) {
   Fail "SafeModeAdminPasswordPrompt must be true to continue."
 }
 $DsrmPassword = Read-Host "Enter DSRM password" -AsSecureString
 
-$InterfaceAlias = $Config.DC.InterfaceAlias
-$IPAddress = $Config.DC.IpAddress
-$PrefixLength = $Config.DC.PrefixLength
-$Gateway = $Config.DC.Gateway
-$Hostname = $Config.DC.hostname
+$InterfaceAlias = $AdConfig.DC.InterfaceAlias
+$IPAddress = $AdConfig.DC.IpAddress
+$PrefixLength = $AdConfig.DC.PrefixLength
+$Gateway = $AdConfig.DC.Gateway
+$Hostname = $AdConfig.DC.hostname
 
-$SysvolScripts = $Config.Path.SysvolScripts
+$SysvolScripts = $AdConfig.Path.SysvolScripts
 
-$OUWorkstationsName = $Config.OU.Workstations
-$OUUsersName = $Config.OU.Users
+$OUWorkstationsName = $AdConfig.OU.Workstations
+$OUUsersName = $AdConfig.OU.Users
 
-$GPOUserName = $Config.GPO.Users.Name
-$GPOUserBackup = $Config.GPO.Users.GpoBackup
+$GPOUserName = $AdConfig.GPO.Users.Name
+$GPOUserBackup = $AdConfig.GPO.Users.GpoBackup
 
-$GPOWorkstationName = $Config.GPO.Workstations.Name
-$GPOWorkstationBackup = $Config.GPO.Workstations.GpoBackup
-$GPOWorkstationBootstrapScript = $Config.GPO.Workstations.BootstrapScript
+$GPOWorkstationName = $AdConfig.GPO.Workstations.Name
+$GPOWorkstationBackup = $AdConfig.GPO.Workstations.GpoBackup
+$GPOWorkstationBootstrapScript = $AdConfig.GPO.Workstations.BootstrapScript
 
 Write-Section "Domain Controller configuration"
 

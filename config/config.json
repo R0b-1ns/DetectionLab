@@ -1,32 +1,61 @@
 {
-  "Domain": {
-    "DnsName": "ruppe.lab",
-    "NetBiosName":"LAB",
-    "SafeModeAdminPasswordPrompt": true
-  },
-  "DC":{
-    "InterfaceAlias":"Ethernet",
-    "IpAddress":"10.10.0.11",
-    "PrefixLength": 24,
-    "Gateway": "10.10.0.1",
-    "hostname": "WIN-DC" 
-  },
-  "Path":{
-    "SysvolScripts":"\\\\ruppe.lab\\\\SYSVOL\\\\ruppe.lab\\\\scripts"
-  },
-  "OU": {
-    "Workstations":"Workstations",
-    "Users":"AdUsers"
-  },
-  "GPO":{
-    "Users":{
-      "Name":"GPO-Users",
-      "GpoBackup":"c:\\Backups\\GPO\\Users"
+  "AD": {
+    "Domain": {
+      "DnsName": "ruppe.lab",
+      "NetBiosName":"LAB",
+      "SafeModeAdminPasswordPrompt": true
     },
-    "Workstations":{
-      "Name":"GPO-Workstations",
-      "GpoBackup":"c:\\Backups\\GPO\\Workstations",
-      "BootstrapScript":"C:\\Scripts\\bootstrap\\workstations-bootstrap.ps1"
+    "DC":{
+      "InterfaceAlias":"Ethernet",
+      "IpAddress":"10.10.0.11",
+      "PrefixLength": 24,
+      "Gateway": "10.10.0.1",
+      "hostname": "WIN-DC" 
+    },
+    "Path":{
+      "SysvolScripts":"\\\\ruppe.lab\\\\SYSVOL\\\\ruppe.lab\\\\scripts"
+    },
+    "OU": {
+      "Workstations":"Workstations",
+      "Users":"AdUsers"
+    },
+    "GPO":{
+      "Users":{
+        "Name":"GPO-Users",
+        "GpoBackup":"c:\\Backups\\GPO\\Users"
+      },
+      "Workstations":{
+        "Name":"GPO-Workstations",
+        "GpoBackup":"c:\\Backups\\GPO\\Workstations",
+        "BootstrapScript":"C:\\Scripts\\bootstrap\\workstations-bootstrap.ps1"
+      }
+    }
+  },
+  "SIEM": {
+    "Networking": {
+      "IpAddress": "10.10.0.10",
+      "PrefixLength": 24,
+      "Gateway": "10.10.0.1",
+      "DnsServer": "10.10.0.11",
+      "Hostname": "SIEM"
+    }
+  },
+  "Server": {
+    "Networking": {
+      "IpAddress": "10.10.0.13",
+      "PrefixLength": 24,
+      "Gateway": "10.10.0.1",
+      "DnsServer": "10.10.0.11",
+      "Hostname": "WEB-SRV"
+    }
+  },
+  "Win10-PC1": {
+    "Networking": {
+      "IpAddress": "10.10.0.12",
+      "PrefixLength": 24,
+      "Gateway": "10.10.0.1",
+      "DnsServer": "10.10.0.11",
+      "Hostname": "WIN10-PC1"
     }
   }
 }
