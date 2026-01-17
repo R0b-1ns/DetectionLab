@@ -14,7 +14,7 @@
   "Path":{
     "SysvolScripts":"\\\\ruppe.lab\\\\SYSVOL\\\\ruppe.lab\\\\scripts"
   },
-  "OU": {
+  "OU": {
     "Workstations":"Workstations",
     "Users":"AdUsers"
   },
