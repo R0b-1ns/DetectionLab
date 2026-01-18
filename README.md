@@ -21,6 +21,7 @@ The repository contains the full lab structure and installation scripts.
 config/
   config.json
   wazuh/
+terraform/
 docs/
   installation/
   ad/
@@ -34,12 +35,14 @@ scripts/
 ```
 
 - `config/` holds lab-wide settings and Wazuh templates.
+- `terraform/` contains the optional Proxmox VM creation files.
 - `docs/` contains installation and role-specific documentation.
 - `scripts/` contains PowerShell and Bash install/automation scripts.
 
 ## Documentation
 
 - Installation: [docs/installation/README.md](https://github.com/R0b-1ns/DetectionLab/blob/main/docs/installation/README.md)
+- Terraform (Proxmox): [terraform/README.md](https://github.com/R0b-1ns/DetectionLab/blob/main/terraform/README.md)
 - Active Directory: [docs/ad/README.md](https://github.com/R0b-1ns/DetectionLab/blob/main/docs/ad/README.md)
 - Workstations: [docs/workstations/README.md](https://github.com/R0b-1ns/DetectionLab/blob/main/docs/workstations/README.md)
 - SIEM: [docs/siem/README.md](https://github.com/R0b-1ns/DetectionLab/blob/main/docs/siem/README.md)
