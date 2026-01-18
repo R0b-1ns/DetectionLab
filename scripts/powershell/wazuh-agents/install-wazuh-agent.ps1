@@ -79,13 +79,22 @@ function Set-WazuhManagerAddress {
   )
 
   [xml]$xml = Get-Content -Raw -Path $Path
-  if (-not $xml.ossec_config -or -not $xml.ossec_config.client -or -not $xml.ossec_config.client.server) {
+  if (-not $xml.SelectSingleNode("//client/server")) {
     Fail "Invalid ossec.conf format: missing client/server definition."
   }
 
-  $servers = $xml.ossec_config.client.server
-  foreach ($server in @($servers)) {
-    $server.address = $Address
+  $addressNodes = $xml.SelectNodes("//client/server/address")
+  if ($addressNodes.Count -eq 0) {
+    $serverNodes = $xml.SelectNodes("//client/server")
+    foreach ($server in $serverNodes) {
+      $addressNode = $xml.CreateElement("address")
+      $addressNode.InnerText = $Address
+      $server.AppendChild($addressNode) | Out-Null
+    }
+  } else {
+    foreach ($node in $addressNodes) {
+      $node.InnerText = $Address
+    }
   }
 
   $xml.Save($Path)
