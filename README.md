@@ -12,6 +12,7 @@ scripts/
     ad/
       AD-config.ps1
     workstations/
+      w10-workstation-bootstrap.ps1
       workstations-bootstrap.ps1
   bash/
 docs/
@@ -20,14 +21,18 @@ docs/
 ## Quick usage (AD/DC)
 
 1) Edit `config/config.json` to match your domain and network.
-2) Update the path `GPO.Workstations.BootstrapScript` so it matches the local
-   location of `workstations-bootstrap.ps1` on the DC.
-3) Run `scripts/powershell/ad/AD-config.ps1` as administrator.
+2) Run `scripts/powershell/ad/AD-config.ps1` as administrator.
+
+## Quick usage (Windows 10 workstation)
+
+1) Run `scripts/powershell/workstations/w10-workstation-bootstrap.ps1` as administrator.
+2) The script applies networking, joins the domain, installs Sysmon, and then runs
+   `scripts/powershell/workstations/workstations-bootstrap.ps1` locally.
 
 ## Notes
 
 - The AD script prompts for the DSRM password (no env var).
-- The script then copies the bootstrap to SYSVOL and attaches it to the GPO.
+- The workstation script handles the local bootstrap and reboots at the end if required.
 
 ## Scenario examples (MITRE ATT&CK)
 

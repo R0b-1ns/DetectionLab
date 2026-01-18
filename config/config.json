@@ -26,8 +26,7 @@
       },
       "Workstations":{
         "Name":"GPO-Workstations",
-        "GpoBackup":"c:\\Backups\\GPO\\Workstations",
-        "BootstrapScript":"C:\\Scripts\\bootstrap\\workstations-bootstrap.ps1"
+        "GpoBackup":"c:\\Backups\\GPO\\Workstations"
       }
     }
   },

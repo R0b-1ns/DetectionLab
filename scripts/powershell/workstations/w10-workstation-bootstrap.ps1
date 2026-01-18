@@ -83,6 +83,7 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $configPath = Join-Path (Resolve-Path (Join-Path $scriptRoot "..\..\..\config")) "config.json"
 $Config = Get-LabConfig -Path $configPath
 $NodeConfig = $Config.'Win10-PC1'.Networking
+$needsReboot = $false
 
 $IPAddress = $NodeConfig.IpAddress
 $PrefixLength = $NodeConfig.PrefixLength
@@ -97,8 +98,7 @@ Write-Section "System configuration"
 if ($Hostname -and ($env:COMPUTERNAME -ne $Hostname)) {
   Write-Host "[!] Renaming computer to $Hostname (reboot required)" -ForegroundColor Yellow
   Rename-Computer -NewName $Hostname -Force
-  Write-Host "[!] Reboot and re-run the script to continue." -ForegroundColor Yellow
-  exit 0
+  $needsReboot = $true
 }
 
 $InterfaceAlias = Resolve-PrimaryInterfaceAlias
@@ -138,9 +138,8 @@ if (-not $computerSystem.PartOfDomain) {
   Write-Host "Joining domain $DomainDnsName" -ForegroundColor DarkGray
   $credential = Get-Credential -Message "Enter credentials for $DomainNetBios domain join"
   Add-Computer -DomainName $DomainDnsName -Credential $credential -ErrorAction Stop
-  Write-Host "[!] Domain join complete; rebooting." -ForegroundColor Yellow
-  Restart-Computer -Force
-  exit 0
+  Write-Host "[!] Domain join complete; reboot required." -ForegroundColor Yellow
+  $needsReboot = $true
 }
 
 Write-Section "Sysmon installation"
@@ -150,4 +149,16 @@ if (-not (Test-Path $sysmonScript)) {
 }
 & $sysmonScript
 
+Write-Section "Workstation baseline"
+$baselineScript = Join-Path $scriptRoot "workstations-bootstrap.ps1"
+if (-not (Test-Path $baselineScript)) {
+  Fail "Workstations bootstrap script not found: $baselineScript"
+}
+& $baselineScript
+
 Write-Host "[+] WIN10-PC1 configuration complete."
+
+if ($needsReboot) {
+  Write-Host "[!] The computer will reboot to apply changes." -ForegroundColor Yellow
+  Restart-Computer -Force
+}

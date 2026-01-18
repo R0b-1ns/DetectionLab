@@ -93,8 +93,7 @@ function Get-LabConfig {
     "AD.GPO.Users.Name",
     "AD.GPO.Users.GpoBackup",
     "AD.GPO.Workstations.Name",
-    "AD.GPO.Workstations.GpoBackup",
-    "AD.GPO.Workstations.BootstrapScript"
+    "AD.GPO.Workstations.GpoBackup"
   )
 
   foreach ($item in $requiredPaths) {
@@ -145,7 +144,6 @@ $GPOUserBackup = $AdConfig.GPO.Users.GpoBackup
 
 $GPOWorkstationName = $AdConfig.GPO.Workstations.Name
 $GPOWorkstationBackup = $AdConfig.GPO.Workstations.GpoBackup
-$GPOWorkstationBootstrapScript = $AdConfig.GPO.Workstations.BootstrapScript
 
 Write-Section "Domain Controller configuration"
 
@@ -349,22 +347,3 @@ Set-GPRegistryValue -Name $GPOWorkstationName `
   -ValueName "EnableScripts" `
   -Type DWord `
   -Value 1
-
-Ensure-Directory -Path (Split-Path -Parent $GPOWorkstationBootstrapScript)
-if (-not (Test-Path $GPOWorkstationBootstrapScript)) {
-  Fail "Bootstrap script not found: $GPOWorkstationBootstrapScript"
-}
-
-$BootstrapScriptName = Split-Path -Leaf $GPOWorkstationBootstrapScript
-$BootstrapScriptSysvolPath = Join-Path $SysvolScripts $BootstrapScriptName
-
-Ensure-Directory -Path $SysvolScripts
-Copy-Item -Path $GPOWorkstationBootstrapScript -Destination $BootstrapScriptSysvolPath -Force
-
-$runOnceCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$BootstrapScriptSysvolPath`""
-Set-GPRegistryValue `
-  -Name $GPOWorkstationName `
-  -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce" `
-  -ValueName "DL-Bootstrap" `
-  -Type String `
-  -Value $runOnceCommand
