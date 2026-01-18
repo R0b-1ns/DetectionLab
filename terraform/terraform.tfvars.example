@@ -1,0 +1,10 @@
+proxmox_endpoint  = "https://pve.example:8006"
+proxmox_api_token = "root@pam!terraform=CHANGEME"
+proxmox_insecure  = true
+
+proxmox_node   = "pve"
+iso_datastore  = "local"
+disk_datastore = "SSD-2to"
+
+lan_bridge = "vmbr0"
+wan_bridge = "vmbr1"

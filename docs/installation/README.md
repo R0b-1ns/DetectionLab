@@ -30,6 +30,29 @@ This lab expects 4 VMs on the internal network.
    - Used by Windows Sysprep to automate first boot.
    - Ensures the workstation bootstrap script runs after OOBE.
 
+## Terraform (optional)
+
+If you want Terraform to create the VMs on Proxmox, use the files in `terraform/`:
+
+1) Copy and edit the variables file:
+
+```
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars
+```
+
+2) Update `terraform/terraform.tfvars` with your Proxmox API endpoint, token, node, and datastore.
+
+3) Create the VMs:
+
+```
+terraform -chdir=terraform init
+terraform -chdir=terraform apply
+```
+
+Notes:
+- Windows Server (AD) needs the VirtIO driver ISO attached manually or disk/network models adjusted.
+- EFI/TPM settings may need to be set in Proxmox after creation, depending on your provider version.
+
 ## Installation order
 
 1) SIEM server (Ubuntu 22.04)
