@@ -19,7 +19,7 @@ This lab expects 4 VMs on the internal network.
 
 1) SIEM server (Ubuntu 22.04)
    - Deploy and configure first.
-   - Install Wazuh manager/indexer/dashboard.
+   - Run `scripts/bash/siem-bootstrap.bash`.
 
 2) Active Directory (Windows Server)
    - Boot the VM.
@@ -29,3 +29,17 @@ This lab expects 4 VMs on the internal network.
 3) Windows workstations
    - For a fresh install, run `scripts/powershell/workstations/install-w10.ps1`.
    - For Sysprep, use the preconfigured `config/unattend.xml`.
+
+4) Linux web server (Debian 13)
+   - Run `scripts/bash/web-server-bootstrap.bash`.
+   - Add `--start-agent` if you want the Wazuh agent enabled immediately.
+
+## Offline assets
+
+- Wazuh server installer: `scripts/bash/assets/wazuh/wazuh-install.sh`
+- Wazuh agent package: `scripts/bash/assets/wazuh/wazuh-agent_4.14.2-1_amd64.deb`
+
+## Additional documentation
+
+- SIEM: `docs/siem/README.md`
+- Server: `docs/server/README.md`

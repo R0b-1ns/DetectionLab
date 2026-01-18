@@ -15,6 +15,11 @@ scripts/
       w10-workstation-bootstrap.ps1
       workstations-bootstrap.ps1
   bash/
+    linux-network-bootstrap.bash
+    siem-bootstrap.bash
+    web-server-bootstrap.bash
+    wazuh_server_ubuntu.bash
+    wazuh_agent_debian.bash
 docs/
 ```
 
@@ -25,6 +30,8 @@ docs/
 - Installation: `docs/installation/README.md`
 - Active Directory: `docs/ad/README.md`
 - Workstations: `docs/workstations/README.md`
+- SIEM: `docs/siem/README.md`
+- Server: `docs/server/README.md`
 
 ## Quick usage (AD/DC)
 
