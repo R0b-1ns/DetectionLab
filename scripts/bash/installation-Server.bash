@@ -35,3 +35,6 @@ log_info "Bootstrapping web server network and hostname from config..."
 
 log_info "Launching web server installer..."
 "$SCRIPT_DIR/server/web_server_debian.bash" --config "$CONFIG_PATH" $([[ "$START_AGENT" == "true" ]] && echo "--start-agent")
+
+log_info "Launching security tooling installer..."
+"$SCRIPT_DIR/server/security_tools_debian.bash"
