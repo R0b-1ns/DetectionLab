@@ -18,6 +18,13 @@ scripts/
 docs/
 ```
 
+## Documentation
+
+- Architecture: `docs/architecture.md`
+- Attack and detection notes: `docs/attaque-detection.md`
+- Active Directory: `docs/ad/README.md`
+- Workstations: `docs/workstations/README.md`
+
 ## Quick usage (AD/DC)
 
 1) Edit `config/config.json` to match your domain and network.
