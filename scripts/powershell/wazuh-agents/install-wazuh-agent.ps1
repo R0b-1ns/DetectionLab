@@ -105,8 +105,8 @@ Assert-Admin
 Write-Section "Wazuh agent installation (offline)"
 
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$configPath = Join-Path (Resolve-Path (Join-Path $scriptRoot "..\..\..\config")) "config.json"
-$Config = Get-LabConfig -Path $configPath
+$labConfigPath = Join-Path (Resolve-Path (Join-Path $scriptRoot "..\..\..\config")) "config.json"
+$Config = Get-LabConfig -Path $labConfigPath
 $WazuhManager = $Config.SIEM.Networking.IpAddress
 
 $existingService = Get-Service -Name "Wazuh","WazuhSvc" -ErrorAction SilentlyContinue | Select-Object -First 1
