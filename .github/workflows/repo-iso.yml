@@ -1,0 +1,36 @@
+name: Build Repo ISO
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ISO tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso
+
+      - name: Build ISO
+        run: |
+          bash utils/create-repo-iso.sh ./DetectionLabScripts.iso DETECTIONLABSCRIPTS
+
+      - name: Publish rolling release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view latest >/dev/null 2>&1; then
+            gh release upload latest ./DetectionLabScripts.iso --clobber
+          else
+            gh release create latest ./DetectionLabScripts.iso \
+              --title "Latest" \
+              --notes "Automated build from main."
+          fi
