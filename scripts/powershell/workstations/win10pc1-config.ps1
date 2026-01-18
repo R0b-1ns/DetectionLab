@@ -143,4 +143,11 @@ if (-not $computerSystem.PartOfDomain) {
   exit 0
 }
 
+Write-Section "Sysmon installation"
+$sysmonScript = Join-Path $scriptRoot "sysmon-install.ps1"
+if (-not (Test-Path $sysmonScript)) {
+  Fail "Sysmon install script not found: $sysmonScript"
+}
+& $sysmonScript
+
 Write-Host "[+] WIN10-PC1 configuration complete."
