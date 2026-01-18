@@ -1,6 +1,10 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+param(
+  [string]$IpAddress
+)
+
 function Write-Section {
   param([Parameter(Mandatory)][string]$Message)
   Write-Host "[+] $Message" -ForegroundColor Cyan
@@ -76,20 +80,57 @@ function Resolve-PrimaryInterfaceAlias {
   Fail "Unable to determine a network interface to configure."
 }
 
+function Read-IPv4Address {
+  param([Parameter(Mandatory)][string]$Prompt)
+
+  while ($true) {
+    $inputValue = Read-Host $Prompt
+    $ip = $null
+    if ([System.Net.IPAddress]::TryParse($inputValue, [ref]$ip) -and $ip.AddressFamily -eq "InterNetwork") {
+      return $inputValue
+    }
+    Write-Host "Invalid IPv4 address, try again." -ForegroundColor Yellow
+  }
+}
+
+function Get-UniqueHostname {
+  $uuid = (Get-CimInstance Win32_ComputerSystemProduct).UUID
+  if (-not $uuid) {
+    $uuid = [Guid]::NewGuid().ToString()
+  }
+  $shortId = ($uuid -replace "[^A-Fa-f0-9]", "").ToUpper()
+  if ($shortId.Length -gt 8) {
+    $shortId = $shortId.Substring(0, 8)
+  }
+  if (-not $shortId) {
+    $shortId = (Get-Random -Minimum 10000000 -Maximum 99999999).ToString()
+  }
+  return "PC-$shortId"
+}
+
 Assert-Admin
-Write-Section "WIN10-PC1 configuration initialization"
+Write-Section "WIN10 workstation bootstrap initialization"
 
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$configPath = Join-Path (Resolve-Path (Join-Path $scriptRoot "..\..\..\config")) "config.json"
+$localConfig = Join-Path $scriptRoot "config.json"
+if (Test-Path $localConfig) {
+  $configPath = $localConfig
+} else {
+  $configPath = Join-Path (Resolve-Path (Join-Path $scriptRoot "..\..\..\config")) "config.json"
+}
 $Config = Get-LabConfig -Path $configPath
 $NodeConfig = $Config.'Win10-PC1'.Networking
 $needsReboot = $false
 
-$IPAddress = $NodeConfig.IpAddress
+$IPAddress = if ($IpAddress) { $IpAddress } else { Read-IPv4Address -Prompt "Enter IPv4 address for this workstation" }
+$parsedIp = $null
+if (-not ([System.Net.IPAddress]::TryParse($IPAddress, [ref]$parsedIp) -and $parsedIp.AddressFamily -eq "InterNetwork")) {
+  Fail "Invalid IPv4 address provided: $IPAddress"
+}
 $PrefixLength = $NodeConfig.PrefixLength
 $Gateway = $NodeConfig.Gateway
 $DnsServer = $NodeConfig.DnsServer
-$Hostname = $NodeConfig.Hostname
+$Hostname = Get-UniqueHostname
 $DomainDnsName = $Config.AD.Domain.DnsName
 $DomainNetBios = $Config.AD.Domain.NetBiosName
 
@@ -142,28 +183,7 @@ if (-not $computerSystem.PartOfDomain) {
   $needsReboot = $true
 }
 
-Write-Section "Sysmon installation"
-$sysmonScript = Join-Path $scriptRoot "sysmon-install.ps1"
-if (-not (Test-Path $sysmonScript)) {
-  Fail "Sysmon install script not found: $sysmonScript"
-}
-& $sysmonScript
-
-Write-Section "Workstation baseline"
-$baselineScript = Join-Path $scriptRoot "workstations-bootstrap.ps1"
-if (-not (Test-Path $baselineScript)) {
-  Fail "Workstations bootstrap script not found: $baselineScript"
-}
-& $baselineScript
-
-Write-Section "Wazuh agent installation"
-$wazuhScript = Join-Path $scriptRoot "..\\wazuh-agents\\install-wazuh-agent.ps1"
-if (-not (Test-Path $wazuhScript)) {
-  Fail "Wazuh agent install script not found: $wazuhScript"
-}
-& $wazuhScript -MachineType "workstation"
-
-Write-Host "[+] WIN10-PC1 configuration complete."
+Write-Host "[+] WIN10 workstation bootstrap complete."
 
 if ($needsReboot) {
   Write-Host "[!] The computer will reboot to apply changes." -ForegroundColor Yellow
