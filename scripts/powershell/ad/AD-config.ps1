@@ -347,3 +347,10 @@ Set-GPRegistryValue -Name $GPOWorkstationName `
   -ValueName "EnableScripts" `
   -Type DWord `
   -Value 1
+
+Write-Section "Wazuh agent installation"
+$wazuhScript = Join-Path $scriptRoot "..\\wazuh-agents\\install-wazuh-agent.ps1"
+if (-not (Test-Path $wazuhScript)) {
+  Fail "Wazuh agent install script not found: $wazuhScript"
+}
+& $wazuhScript -MachineType "ad"

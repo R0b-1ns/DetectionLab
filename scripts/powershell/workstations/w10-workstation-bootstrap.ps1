@@ -156,6 +156,13 @@ if (-not (Test-Path $baselineScript)) {
 }
 & $baselineScript
 
+Write-Section "Wazuh agent installation"
+$wazuhScript = Join-Path $scriptRoot "..\\wazuh-agents\\install-wazuh-agent.ps1"
+if (-not (Test-Path $wazuhScript)) {
+  Fail "Wazuh agent install script not found: $wazuhScript"
+}
+& $wazuhScript -MachineType "workstation"
+
 Write-Host "[+] WIN10-PC1 configuration complete."
 
 if ($needsReboot) {
