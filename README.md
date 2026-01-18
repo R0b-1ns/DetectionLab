@@ -3,8 +3,6 @@
 This project builds a SOC/SIEM lab based on Active Directory and Wazuh.
 The repository contains the full lab structure and installation scripts.
 
-![Lab architecture](https://github.com/R0b-1ns/DetectionLab/blob/main/docs/assets/lab-architecture.png)
-
 ## Prerequisites
 
 - Designed on Proxmox 9.0.3, but works on any hypervisor.

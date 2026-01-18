@@ -15,6 +15,21 @@ This lab expects 4 VMs on the internal network.
 - Wazuh agent templates live in `config/wazuh/*.conf`.
 - Windows Sysprep uses `config/unattend.xml`.
 
+## Configuration
+
+1) Edit `config/config.json`
+   - Set IP addresses, gateway, DNS, and hostnames for each VM.
+   - Keep the SIEM and Server blocks aligned with your lab network.
+
+2) Update Wazuh templates in `config/wazuh/`
+   - `workstation-ossec.conf` and `ad-ossec.conf` are applied by the Windows agent scripts.
+   - `linux-server-ossec.conf` is applied by the Linux server agent script.
+   - Replace placeholders (for example `WAZUH_MANAGER_IP`) where applicable.
+
+3) Adjust `config/unattend.xml` (optional)
+   - Used by Windows Sysprep to automate first boot.
+   - Ensures the workstation bootstrap script runs after OOBE.
+
 ## Installation order
 
 1) SIEM server (Ubuntu 22.04)
@@ -36,11 +51,21 @@ This lab expects 4 VMs on the internal network.
 
 ## Offline assets
 
+- For compatibility with newer Wazuh versions, the server installer script and agent package are stored locally.
 - Wazuh server installer: `scripts/bash/assets/wazuh/wazuh-install.sh`
 - Wazuh agent package: `scripts/bash/assets/wazuh/wazuh-agent_4.14.2-1_amd64.deb`
 - Wazuh agent template (Linux server): `config/wazuh/linux-server-ossec.conf`
+
+## Install tips
+
+- `utils/create-repo-iso.sh` builds a repo ISO you can mount on each VM
+  to avoid cloning from Git.
+- Make sure your router or gateway is configured with the expected static IP
+  before running the scripts. The scripts change network settings and then
+  download packages, so a wrong gateway can leave the VM without internet.
 
 ## Additional documentation
 
 - SIEM: `docs/siem/README.md`
 - Server: `docs/server/README.md`
+- Wazuh official docs: https://documentation.wazuh.com/current/
