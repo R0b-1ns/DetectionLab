@@ -8,8 +8,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=lib/common.sh
-source "$SCRIPT_DIR/lib/common.sh"
+# shellcheck source=../common/lib/common.sh
+source "$SCRIPT_DIR/../common/lib/common.sh"
 
 require_root
 
@@ -39,6 +39,7 @@ done
 REPO_ROOT="$(get_repo_root)"
 CONFIG_PATH="${CONFIG_PATH:-$REPO_ROOT/config/config.json}"
 AGENT_PACKAGE="${AGENT_PACKAGE:-$REPO_ROOT/scripts/bash/assets/wazuh/wazuh-agent_4.14.2-1_amd64.deb}"
+OSSEC_TEMPLATE="${OSSEC_TEMPLATE:-$REPO_ROOT/config/wazuh/linux-server-ossec.conf}"
 START_AGENT="${START_AGENT:-false}"
 
 if [[ ! -f "$CONFIG_PATH" ]]; then
@@ -48,6 +49,11 @@ fi
 
 if [[ ! -f "$AGENT_PACKAGE" ]]; then
   log_error "Wazuh agent package not found: $AGENT_PACKAGE"
+  exit 1
+fi
+
+if [[ ! -f "$OSSEC_TEMPLATE" ]]; then
+  log_error "Wazuh agent template not found: $OSSEC_TEMPLATE"
   exit 1
 fi
 
@@ -70,6 +76,12 @@ cp "$AGENT_PACKAGE" /tmp/wazuh-agent.deb
 WAZUH_MANAGER="$WAZUH_MANAGER" \
 WAZUH_AGENT_NAME="$WAZUH_AGENT_NAME" \
 apt-get install -y /tmp/wazuh-agent.deb
+
+log_info "Applying Wazuh agent configuration..."
+cp "$OSSEC_TEMPLATE" /var/ossec/etc/ossec.conf
+sed -i "s/WAZUH_MANAGER_IP/${WAZUH_MANAGER}/g" /var/ossec/etc/ossec.conf
+chmod 640 /var/ossec/etc/ossec.conf
+chown root:ossec /var/ossec/etc/ossec.conf || true
 
 systemctl daemon-reexec
 

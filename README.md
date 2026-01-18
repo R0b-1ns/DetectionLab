@@ -15,11 +15,11 @@ scripts/
       w10-workstation-bootstrap.ps1
       workstations-bootstrap.ps1
   bash/
-    linux-network-bootstrap.bash
-    siem-bootstrap.bash
-    web-server-bootstrap.bash
-    wazuh_server_ubuntu.bash
-    wazuh_agent_debian.bash
+    installation-SIEM.bash
+    installation-Server.bash
+    common/
+    siem/
+    server/
 docs/
 ```
 

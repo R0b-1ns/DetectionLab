@@ -2,8 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=lib/common.sh
-source "$SCRIPT_DIR/lib/common.sh"
+# shellcheck source=common/lib/common.sh
+source "$SCRIPT_DIR/common/lib/common.sh"
 
 require_root
 
@@ -26,7 +26,7 @@ REPO_ROOT="$(get_repo_root)"
 CONFIG_PATH="${CONFIG_PATH:-$REPO_ROOT/config/config.json}"
 
 log_info "Bootstrapping SIEM network and hostname from config..."
-"$SCRIPT_DIR/linux-network-bootstrap.bash" --role SIEM --config "$CONFIG_PATH"
+"$SCRIPT_DIR/common/linux-network-bootstrap.bash" --role SIEM --config "$CONFIG_PATH"
 
 log_info "Launching Wazuh server installer..."
-"$SCRIPT_DIR/wazuh_server_ubuntu.bash"
+"$SCRIPT_DIR/siem/wazuh_server_ubuntu.bash"

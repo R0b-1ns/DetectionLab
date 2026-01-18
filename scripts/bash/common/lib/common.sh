@@ -19,7 +19,7 @@ require_root() {
 get_repo_root() {
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  echo "$(cd "$script_dir/../.." && pwd)"
+  echo "$(cd "$script_dir/../../../../" && pwd)"
 }
 
 json_get() {
