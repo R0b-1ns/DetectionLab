@@ -66,8 +66,7 @@ function Get-AgentConfigPath {
 function Get-ConfigTemplatePath {
   param([Parameter(Mandatory)][string]$MachineType)
 
-  $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-  $basePath = Join-Path $scriptRoot "..\\..\\..\\config\\wazuh"
+  $basePath = Join-Path $PSScriptRoot "..\\..\\..\\config\\wazuh"
   $fileName = if ($MachineType -eq "ad") { "ad-ossec.conf" } else { "workstation-ossec.conf" }
   return Join-Path $basePath $fileName
 }
