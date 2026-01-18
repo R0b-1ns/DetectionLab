@@ -1,11 +1,11 @@
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
-
 param(
   [string]$SysmonZipPath = (Join-Path $PSScriptRoot "assets\\Sysmon.zip"),
   [string]$ConfigPath = (Join-Path $PSScriptRoot "assets\\sysmonconfig.xml"),
   [string]$InstallDir = "C:\\Windows"
 )
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 function Write-Section {
   param([Parameter(Mandatory)][string]$Message)
