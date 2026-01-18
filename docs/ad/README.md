@@ -1,6 +1,17 @@
 # AD Documentation
 
-This section documents what the AD bootstrap script creates by default.
+This section documents how the DC install and AD configuration scripts work.
+
+## Scripts
+
+- `scripts/powershell/ad/install-dc.ps1`
+  - Configures IP/DNS and hostname on the future DC.
+  - Installs AD DS + DNS and promotes the server to a new forest.
+  - Reboots as needed.
+
+- `scripts/powershell/ad/AD-config.ps1`
+  - Creates OUs and GPOs and applies baseline policies.
+  - Installs and starts the Wazuh agent after policies are in place.
 
 ## Organizational Units
 

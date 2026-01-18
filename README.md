@@ -22,13 +22,15 @@ docs/
 
 - Architecture: `docs/architecture.md`
 - Attack and detection notes: `docs/attaque-detection.md`
+- Installation: `docs/installation/README.md`
 - Active Directory: `docs/ad/README.md`
 - Workstations: `docs/workstations/README.md`
 
 ## Quick usage (AD/DC)
 
 1) Edit `config/config.json` to match your domain and network.
-2) Run `scripts/powershell/ad/AD-config.ps1` as administrator.
+2) Run `scripts/powershell/ad/install-dc.ps1` as administrator.
+3) After reboot and domain creation, run `scripts/powershell/ad/AD-config.ps1`.
 
 ## Quick usage (Windows 10 workstation)
 

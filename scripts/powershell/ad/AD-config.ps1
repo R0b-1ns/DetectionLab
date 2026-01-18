@@ -81,13 +81,6 @@ function Get-LabConfig {
   $requiredPaths = @(
     "AD.Domain.DnsName",
     "AD.Domain.NetBiosName",
-    "AD.Domain.SafeModeAdminPasswordPrompt",
-    "AD.DC.InterfaceAlias",
-    "AD.DC.IpAddress",
-    "AD.DC.PrefixLength",
-    "AD.DC.Gateway",
-    "AD.DC.hostname",
-    "AD.Path.SysvolScripts",
     "AD.OU.Workstations",
     "AD.OU.Users",
     "AD.GPO.Users.Name",
@@ -122,20 +115,6 @@ $AdConfig = $Config.AD
 $DomainName = $AdConfig.Domain.DnsName
 $Netbios = $AdConfig.Domain.NetBiosName
 
-$promptDsrm = [bool]$AdConfig.Domain.SafeModeAdminPasswordPrompt
-if (-not $promptDsrm) {
-  Fail "SafeModeAdminPasswordPrompt must be true to continue."
-}
-$DsrmPassword = Read-Host "Enter DSRM password" -AsSecureString
-
-$InterfaceAlias = $AdConfig.DC.InterfaceAlias
-$IPAddress = $AdConfig.DC.IpAddress
-$PrefixLength = $AdConfig.DC.PrefixLength
-$Gateway = $AdConfig.DC.Gateway
-$Hostname = $AdConfig.DC.hostname
-
-$SysvolScripts = $AdConfig.Path.SysvolScripts
-
 $OUWorkstationsName = $AdConfig.OU.Workstations
 $OUUsersName = $AdConfig.OU.Users
 
@@ -145,84 +124,12 @@ $GPOUserBackup = $AdConfig.GPO.Users.GpoBackup
 $GPOWorkstationName = $AdConfig.GPO.Workstations.Name
 $GPOWorkstationBackup = $AdConfig.GPO.Workstations.GpoBackup
 
-Write-Section "Domain Controller configuration"
-
-if ($Hostname -and ($env:COMPUTERNAME -ne $Hostname)) {
-  Write-Host "[!] Renaming computer to $Hostname (reboot required)" -ForegroundColor Yellow
-  Rename-Computer -NewName $Hostname -Force
-  Write-Host "[!] Reboot and re-run the script to continue." -ForegroundColor Yellow
-  exit 0
-}
-
-Write-Host "Removing DHCP configuration" -ForegroundColor DarkGray
-$dhcpIps = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 -ErrorAction Stop |
-  Where-Object { $_.PrefixOrigin -eq "Dhcp" }
-if ($dhcpIps) {
-  $dhcpIps | Remove-NetIPAddress -Confirm:$false
-}
-
-$existingIp = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 -ErrorAction Stop |
-  Where-Object { $_.IPAddress -eq $IPAddress }
-$otherStaticIps = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 -ErrorAction Stop |
-  Where-Object { $_.IPAddress -ne $IPAddress -and $_.PrefixOrigin -ne "Dhcp" }
-if ($otherStaticIps) {
-  Write-Host "[!] Other static IPv4 addresses exist on $InterfaceAlias; leaving them unchanged." -ForegroundColor Yellow
-}
-
-if (-not $existingIp) {
-  Write-Host "Setting static IP" -ForegroundColor DarkGray
-  New-NetIPAddress `
-    -InterfaceAlias $InterfaceAlias `
-    -IPAddress $IPAddress `
-    -PrefixLength $PrefixLength `
-    -DefaultGateway $Gateway
-}
-
-Write-Host "Setting DNS" -ForegroundColor DarkGray
-$currentDns = (Get-DnsClientServerAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4).ServerAddresses
-if (-not ($currentDns -contains $IPAddress)) {
-  Set-DnsClientServerAddress `
-    -InterfaceAlias $InterfaceAlias `
-    -ServerAddresses $IPAddress
-}
-
-Write-Section "Active Directory installation"
-
-$adFeature = Get-WindowsFeature -Name AD-Domain-Services
-if (-not $adFeature.Installed) {
-  Install-WindowsFeature AD-Domain-Services -IncludeManagementTools | Out-Null
-}
-
-$dnsFeature = Get-WindowsFeature -Name DNS
-if (-not $dnsFeature.Installed) {
-  Install-WindowsFeature DNS -IncludeManagementTools | Out-Null
-}
-
-$domainPresent = $false
-try {
-  Import-Module ActiveDirectory -ErrorAction Stop
-  Get-ADDomain -ErrorAction Stop | Out-Null
-  $domainPresent = $true
-} catch {
-  $domainPresent = $false
-}
-
-if (-not $domainPresent) {
-  Write-Host "[!] Installing new forest $DomainName (this will reboot)" -ForegroundColor Yellow
-  Install-ADDSForest `
-    -DomainName $DomainName `
-    -DomainNetbiosName $Netbios `
-    -InstallDns `
-    -SafeModeAdministratorPassword $DsrmPassword `
-    -Force
-  exit 0
-}
-
 $gpmcFeature = Get-WindowsFeature -Name GPMC
 if (-not $gpmcFeature.Installed) {
   Install-WindowsFeature GPMC | Out-Null
 }
 
+Import-Module ActiveDirectory -ErrorAction Stop
 Import-Module GroupPolicy -ErrorAction Stop
 
 Write-Section "Organizational Units configuration"
@@ -354,3 +261,6 @@ if (-not (Test-Path $wazuhScript)) {
   Fail "Wazuh agent install script not found: $wazuhScript"
 }
 & $wazuhScript -MachineType "ad"
+
+Write-Section "Starting Wazuh agent"
+& net start Wazuh
