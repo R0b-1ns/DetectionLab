@@ -26,3 +26,14 @@ This section explains the workstation scripts and their roles.
 - `scripts/powershell/wazuh-agents/install-wazuh-agent.ps1`
   - Offline Wazuh agent install using local MSI.
   - Applies the correct `ossec.conf` template and replaces the manager IP from `config.json`.
+
+## Sysprep with unattended.xml
+
+Place `config/unattend.xml` on the VM (or in your image), then run:
+
+```
+%WINDIR%\System32\Sysprep\Sysprep.exe /generalize /oobe /shutdown /unattend:C:\Path\To\unattend.xml
+```
+
+On next boot, Windows skips OOBE, creates the `admin` account, and runs
+`C:\Scripts\w10-workstation-bootstrap.ps1` automatically.

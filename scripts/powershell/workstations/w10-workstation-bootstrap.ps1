@@ -2,7 +2,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 param(
-  [string]$IpAddress
+  [string]$IpAddress,
+  [switch]$StartWazuhAgent
 )
 
 function Write-Section {
@@ -108,6 +109,19 @@ function Get-UniqueHostname {
   return "PC-$shortId"
 }
 
+function Start-WazuhAgentService {
+  $service = Get-Service -Name "Wazuh","WazuhSvc" -ErrorAction SilentlyContinue | Select-Object -First 1
+  if (-not $service) {
+    Write-Host "[!] Wazuh service not found; skipping start." -ForegroundColor Yellow
+    return
+  }
+
+  if ($service.Status -ne "Running") {
+    Start-Service -Name $service.Name -ErrorAction Stop
+    Write-Host "[+] Wazuh service started." -ForegroundColor Green
+  }
+}
+
 Assert-Admin
 Write-Section "WIN10 workstation bootstrap initialization"
 
@@ -184,6 +198,11 @@ if (-not $computerSystem.PartOfDomain) {
 }
 
 Write-Host "[+] WIN10 workstation bootstrap complete."
+
+if ($StartWazuhAgent) {
+  Write-Section "Starting Wazuh agent"
+  Start-WazuhAgentService
+}
 
 if ($needsReboot) {
   Write-Host "[!] The computer will reboot to apply changes." -ForegroundColor Yellow
